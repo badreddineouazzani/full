@@ -1,0 +1,14 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Dependencies / build output
+node_modules/
+target/
+
+# Logs
+*.log
+
+# Claude Code local settings
+.claude/settings.local.json
