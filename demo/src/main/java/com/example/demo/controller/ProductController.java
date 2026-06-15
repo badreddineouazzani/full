@@ -2,8 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Product;
 import com.example.demo.service.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,5 +19,16 @@ public class ProductController {
     @GetMapping("/products")
     public List<Product> findProducts() {
         return productService.findAllProducts();
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Void> delete(@PathVariable int id) {
+        productService.deleteProductById(id);
+        return ResponseEntity.noContent().build();   // 204
+    }
+
+    @PostMapping("/products")
+    public Product create(@RequestBody Product produit) {
+        return productService.saveProduct(produit);
     }
 }
