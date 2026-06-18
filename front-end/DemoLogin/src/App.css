@@ -607,6 +607,27 @@
   cursor: not-allowed;
 }
 
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text);
+  margin: 4px 0 0;
+}
+
+.auth-switch-link {
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.auth-switch-link:hover {
+  text-decoration: underline;
+}
+
 .main-layout {
   display: flex;
   align-items: flex-start;

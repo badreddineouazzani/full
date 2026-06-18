@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant U as User
+  participant L as Login / Register
+  participant API as Backend (localhost:8080)
+  participant LS as localStorage
+  participant App as App Router
+
+  U->>L: enter credentials, submit
+  L->>API: POST /api/auth/login (or /register)
+  alt success
+    API-->>L: { token }
+    L->>LS: setItem("token", token)
+    L->>App: onLoginSuccess() then navigate /:locale
+  else failure
+    API-->>L: !res.ok
+    L-->>U: show error message
+  end

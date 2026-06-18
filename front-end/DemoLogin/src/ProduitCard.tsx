@@ -5,6 +5,8 @@ interface ProduitCardProps {
   categoryName: string;
   onDelete: () => void;
   onEdit: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
   deleteMode?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
@@ -18,7 +20,7 @@ function categoryHue(name: string): number {
   return Math.abs(hash) % 360;
 }
 
-function ProduitCard({ namePr, categoryName, onDelete, onEdit, deleteMode, selected, onToggleSelect }: ProduitCardProps) {
+function ProduitCard({ namePr, categoryName, onDelete, onEdit, canEdit = true, canDelete = true, deleteMode, selected, onToggleSelect }: ProduitCardProps) {
   const hue = categoryHue(categoryName);
   const colorVars = {
     "--cat-color": `hsl(${hue}, 65%, 45%)`,
@@ -52,16 +54,20 @@ function ProduitCard({ namePr, categoryName, onDelete, onEdit, deleteMode, selec
         </span>
       </div>
 
-      {!deleteMode && (
+      {!deleteMode && (canEdit || canDelete) && (
         <div className="card-actions">
-          <button className="edit-button" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-            <span className="edit-icon">✎</span>
-            <FormattedMessage id="productCard.edit" />
-          </button>
-          <button className="delete-button" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-            <span className="delete-icon">🗑️</span>
-            <FormattedMessage id="productCard.delete" />
-          </button>
+          {canEdit && (
+            <button className="edit-button" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+              <span className="edit-icon">✎</span>
+              <FormattedMessage id="productCard.edit" />
+            </button>
+          )}
+          {canDelete && (
+            <button className="delete-button" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+              <span className="delete-icon">🗑️</span>
+              <FormattedMessage id="productCard.delete" />
+            </button>
+          )}
         </div>
       )}
     </div>

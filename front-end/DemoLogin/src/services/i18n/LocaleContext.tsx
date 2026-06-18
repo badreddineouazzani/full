@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import { IntlProvider } from 'react-intl'
+import { useLocation, useNavigate } from 'react-router-dom'
 import fr from '../../translations/fr.json'
 import en from '../../translations/en.json'
 import ar from '../../translations/ar.json'
@@ -23,8 +24,18 @@ function readStoredLocale(): Locale {
   return stored && stored in CATALOGS ? (stored as Locale) : DEFAULT_LOCALE;
 }
 
+// The active locale is the first URL segment (e.g. /ar/register -> "ar").
+function localeFromPath(pathname: string): Locale | null {
+  const seg = pathname.split('/')[1];
+  return seg && seg in CATALOGS ? (seg as Locale) : null;
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(readStoredLocale);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // URL is the source of truth; fall back to the stored/default locale.
+  const locale = localeFromPath(location.pathname) ?? readStoredLocale();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, locale);
@@ -32,7 +43,18 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr';
   }, [locale]);
 
-  const value = useMemo(() => ({ locale, setLocale }), [locale]);
+  // Switching locale rewrites the first path segment so URLs stay shareable.
+  const setLocale = useCallback((next: Locale) => {
+    const segments = location.pathname.split('/');
+    if (segments[1] && segments[1] in CATALOGS) {
+      segments[1] = next;
+    } else {
+      segments.splice(1, 0, next);
+    }
+    navigate(segments.join('/') + location.search);
+  }, [location.pathname, location.search, navigate]);
+
+  const value = useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
 
   return (
     <LocaleContext.Provider value={value}>

@@ -1,0 +1,12 @@
+graph TD
+  MOCK["MOCK_USERS"] --> users["users state"]
+  users --> stats["stats (count by role)"]
+  users --> filtered["filtered (search by name/email)"]
+  filtered --> table["users table"]
+  table -->|changeRole| roleReset["role + ROLE_DEFAULTS[role] permissions"]
+  table -->|togglePermission| permFlip["flip single permission"]
+  roleReset --> users
+  permFlip --> users
+
+  note["TODO: wire backend<br/>GET/PATCH/POST /api/admin/users"]
+  note -.-> MOCK

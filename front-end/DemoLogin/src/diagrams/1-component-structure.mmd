@@ -1,0 +1,35 @@
+graph TD
+  main["main.tsx<br/>(entry point)"]
+  BrowserRouter["BrowserRouter"]
+  LocaleProvider["LocaleProvider<br/>(services/i18n)"]
+  IntlProvider["IntlProvider (react-intl)"]
+  App["App.tsx<br/>(Routes)"]
+
+  main --> BrowserRouter --> LocaleProvider --> IntlProvider --> App
+
+  App --> LoginRoute --> Login["login.tsx"]
+  App --> RegisterRoute --> Register["Register.tsx"]
+  App --> HomeRoute --> Home["Home.tsx"]
+  App --> AdminRoute --> SuperAdmin["admin/SuperAdminDashboard.tsx"]
+
+  Home --> ProduitCard["ProduitCard.tsx"]
+  Home --> AddProduct["AddProduct.tsx"]
+  Home --> EditProduct["EditProduct.tsx"]
+
+  LocaleProvider -. reads .-> translations["translations/<br/>fr.json - en.json - ar.json"]
+  IntlProvider -. messages .-> translations
+
+  Home -. useLocale .-> LocaleProvider
+  Login -. FormattedMessage .-> IntlProvider
+  Register -. useIntl .-> IntlProvider
+  SuperAdmin -. useLocale/useIntl .-> LocaleProvider
+
+  Home --> AppCss["App.css"]
+  SuperAdmin --> DashCss["admin/Dashboard.css"]
+
+  classDef provider fill:#e3f2fd,stroke:#1976d2;
+  classDef page fill:#f1f8e9,stroke:#558b2f;
+  classDef leaf fill:#fff3e0,stroke:#ef6c00;
+  class BrowserRouter,LocaleProvider,IntlProvider provider;
+  class Login,Register,Home,SuperAdmin page;
+  class ProduitCard,AddProduct,EditProduct leaf;

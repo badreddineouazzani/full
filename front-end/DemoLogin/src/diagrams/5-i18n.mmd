@@ -1,0 +1,10 @@
+graph TD
+  url["URL path segment"] --> resolve{"valid locale?"}
+  stored["localStorage 'locale'"] --> resolve
+  default["DEFAULT_LOCALE = 'fr'"] --> resolve
+  resolve -->|yes| locale["active locale"]
+  resolve -->|no| stored
+  locale --> effects["persist to localStorage<br/>set html lang + dir (rtl for ar)"]
+  locale --> IntlProvider["IntlProvider messages = CATALOGS[locale]"]
+  setLocale["setLocale(next)"] -->|rewrite first segment| navigate["navigate(newPath)"]
+  navigate --> url

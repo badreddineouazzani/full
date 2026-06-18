@@ -1,0 +1,26 @@
+sequenceDiagram
+  participant Home
+  participant API as Backend /products
+  participant LS as localStorage
+
+  Note over Home: mount
+  Home->>API: GET /products (Bearer token)
+  alt 401 Unauthorized
+    API-->>Home: 401
+    Home->>LS: removeItem("token")
+    Home->>Home: onLoggedOut()
+  else ok
+    API-->>Home: Produit[]
+  end
+
+  Note over Home: Add (AddProduct modal)
+  Home->>API: POST /products
+  API-->>Home: ok then fetchProduits()
+
+  Note over Home: Edit (EditProduct modal)
+  Home->>API: PUT /products/:id
+  API-->>Home: ok then fetchProduits()
+
+  Note over Home: Delete (single / bulk)
+  Home->>API: DELETE /products/:id
+  API-->>Home: ok then drop from state

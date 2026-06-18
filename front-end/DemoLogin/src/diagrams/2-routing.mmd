@@ -1,0 +1,23 @@
+graph LR
+  root["/"] -->|redirect| loginR["/:locale/login"]
+  star["* (unknown)"] -->|redirect| loginR
+
+  homeR["/:locale"]
+  registerR["/:locale/register"]
+  adminR["/:locale/admin"]
+
+  loginR -->|"hasToken()"| homeR
+  registerR -->|"hasToken()"| homeR
+  homeR -->|"!hasToken()"| loginR
+  adminR -->|"!hasToken()"| loginR
+
+  loginR -. onLoginSuccess .-> homeR
+  loginR -. onSwitchToRegister .-> registerR
+  registerR -. onSwitchToLogin .-> loginR
+  homeR -. onOpenAdmin .-> adminR
+  adminR -. onBack .-> homeR
+  homeR -. onLoggedOut .-> loginR
+  adminR -. onLoggedOut .-> loginR
+
+  classDef guarded fill:#ffebee,stroke:#c62828;
+  class homeR,adminR guarded;

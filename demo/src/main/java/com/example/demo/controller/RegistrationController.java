@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class RegistrationController {
@@ -19,9 +21,15 @@ public class RegistrationController {
         return "register";
     }
 
+//    @PostMapping("/api/auth/register")
+//    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+//        registrationService.register(request.getUsername(), request.getPassword());
+//        return ResponseEntity.status(HttpStatus.CREATED).body("User créé: " + request.getUsername());
+//    }
+
     @PostMapping("/api/auth/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        registrationService.register(request.getUsername(), request.getPassword());
-        return ResponseEntity.status(HttpStatus.CREATED).body("User créé: " + request.getUsername());
+    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
+        String token = registrationService.register(request.getUsername(),request.getPassword());
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }

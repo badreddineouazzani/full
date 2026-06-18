@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { FormattedMessage } from 'react-intl'
 
 interface LoginProps {
-  onLoginSuccess: () => void;   // callback: notify App when login succeeds
+  onLoginSuccess: () => void;     // callback: notify App when login succeeds
+  onSwitchToRegister: () => void; // callback: go to the register view
 }
 
-function Login({ onLoginSuccess }: LoginProps) {
+function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,13 @@ function Login({ onLoginSuccess }: LoginProps) {
         <button type="submit" className="login-button" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </button>
+
+        <p className="auth-switch">
+          <FormattedMessage id="auth.login.noAccount" />{' '}
+          <button type="button" className="auth-switch-link" onClick={onSwitchToRegister}>
+            <FormattedMessage id="auth.login.signUp" />
+          </button>
+        </p>
       </form>
     </div>
   );
