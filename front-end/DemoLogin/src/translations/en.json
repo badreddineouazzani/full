@@ -1,0 +1,15 @@
+{
+  "common.appName": "Product Management",
+  "common.logout": "Logout",
+  "productList.searchPlaceholder": "Search products...",
+  "productList.noResults": "No products found",
+  "productCard.delete": "Delete",
+  "productCard.edit": "Edit",
+  "sidebar.sortBy": "Sort by",
+  "sidebar.category": "Category",
+  "sidebar.all": "All",
+  "sort.newest": "Newest First",
+  "sort.oldest": "Oldest First",
+  "sort.nameAsc": "Name A → Z",
+  "sort.nameDesc": "Name Z → A"
+}

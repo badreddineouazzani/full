@@ -32,4 +32,11 @@ public class ProductService{
         productRepository.deleteById(id);
     }
 
+    public Product updateProduct(int id, Product product) {
+        Product existing = productRepository.findById(id).orElseThrow();
+        existing.setNamePr(product.getNamePr());
+        existing.setCategory(product.getCategory());
+        return productRepository.save(existing);
+    }
+
 }

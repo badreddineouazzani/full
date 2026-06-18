@@ -1,0 +1,15 @@
+{
+  "common.appName": "Gestion Produits",
+  "common.logout": "Déconnexion",
+  "productList.searchPlaceholder": "Rechercher des produits...",
+  "productList.noResults": "Aucun produit trouvé",
+  "productCard.delete": "Supprimer",
+  "productCard.edit": "Modifier",
+  "sidebar.sortBy": "Trier par",
+  "sidebar.category": "Catégorie",
+  "sidebar.all": "Tous",
+  "sort.newest": "Plus récents",
+  "sort.oldest": "Plus anciens",
+  "sort.nameAsc": "Nom A → Z",
+  "sort.nameDesc": "Nom Z → A"
+}

@@ -1,7 +1,10 @@
+import { FormattedMessage } from 'react-intl'
+
 interface ProduitCardProps {
   namePr: string;
   categoryName: string;
   onDelete: () => void;
+  onEdit: () => void;
   deleteMode?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
@@ -15,7 +18,7 @@ function categoryHue(name: string): number {
   return Math.abs(hash) % 360;
 }
 
-function ProduitCard({ namePr, categoryName, onDelete, deleteMode, selected, onToggleSelect }: ProduitCardProps) {
+function ProduitCard({ namePr, categoryName, onDelete, onEdit, deleteMode, selected, onToggleSelect }: ProduitCardProps) {
   const hue = categoryHue(categoryName);
   const colorVars = {
     "--cat-color": `hsl(${hue}, 65%, 45%)`,
@@ -50,10 +53,16 @@ function ProduitCard({ namePr, categoryName, onDelete, deleteMode, selected, onT
       </div>
 
       {!deleteMode && (
-        <button className="delete-button" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-          <span className="delete-icon">🗑️</span>
-          Delete
-        </button>
+        <div className="card-actions">
+          <button className="edit-button" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+            <span className="edit-icon">✎</span>
+            <FormattedMessage id="productCard.edit" />
+          </button>
+          <button className="delete-button" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+            <span className="delete-icon">🗑️</span>
+            <FormattedMessage id="productCard.delete" />
+          </button>
+        </div>
       )}
     </div>
   );

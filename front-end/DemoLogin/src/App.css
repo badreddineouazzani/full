@@ -1,10 +1,28 @@
 .header-controls {
-  position: absolute;
-  top: 24px;
-  right: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+}
+
+.locale-select {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.locale-select:hover,
+.locale-select:focus {
+  border-color: var(--accent);
+  outline: none;
 }
 
 .theme-toggle {
@@ -66,12 +84,19 @@
 }
 
 .page-header {
-  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+  gap: 16px;
   padding-bottom: 4px;
+}
+
+.page-header h1 {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
 }
 
 /* ── Content header ── */
@@ -334,12 +359,18 @@
   box-sizing: border-box;
 }
 
+.scroll-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
 .product-card {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 20px;
   box-sizing: border-box;
+  overflow: hidden;
   text-align: left;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -398,18 +429,30 @@
   font-size: 13px;
 }
 
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.edit-button,
 .delete-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: auto;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 9px 14px;
+  padding: 9px 8px;
   border-radius: 8px;
-  color: #ef4444;
   background: transparent;
   border: 1px solid var(--border);
   cursor: pointer;
@@ -419,9 +462,24 @@
               opacity 0.2s ease, transform 0.2s ease;
 }
 
+.edit-button {
+  color: var(--accent);
+}
+
+.delete-button {
+  color: #ef4444;
+}
+
+.product-card:hover .edit-button,
 .product-card:hover .delete-button {
   opacity: 1;
   transform: translateY(0);
+}
+
+.edit-button:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .delete-button:hover {
@@ -430,6 +488,7 @@
   border-color: #ef4444;
 }
 
+.edit-button:active,
 .delete-button:active {
   transform: translateY(1px);
 }

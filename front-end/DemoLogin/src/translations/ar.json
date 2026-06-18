@@ -1,0 +1,15 @@
+{
+  "common.appName": "إدارة المنتجات",
+  "common.logout": "تسجيل الخروج",
+  "productList.searchPlaceholder": "البحث عن المنتجات...",
+  "productList.noResults": "لم يتم العثور على منتجات",
+  "productCard.delete": "حذف",
+  "productCard.edit": "تعديل",
+  "sidebar.sortBy": "ترتيب حسب",
+  "sidebar.category": "الفئة",
+  "sidebar.all": "الكل",
+  "sort.newest": "الأحدث أولاً",
+  "sort.oldest": "الأقدم أولاً",
+  "sort.nameAsc": "الاسم أ ← ي",
+  "sort.nameDesc": "الاسم ي ← أ"
+}

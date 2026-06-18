@@ -31,4 +31,9 @@ public class ProductController {
     public Product create(@RequestBody Product produit) {
         return productService.saveProduct(produit);
     }
+
+    @PutMapping("/products/{id}")
+    public Product update(@PathVariable int id, @RequestBody Product produit) {
+        return productService.updateProduct(id, produit);
+    }
 }

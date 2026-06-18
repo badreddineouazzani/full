@@ -1,13 +1,14 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.RegisterRequest;
 import com.example.demo.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class RegistrationController {
 
@@ -18,9 +19,9 @@ public class RegistrationController {
         return "register";
     }
 
-    @PostMapping("/register")
-    public String register(@RequestParam String username, @RequestParam String password) {
-        registrationService.register(username, password);
-        return "redirect:/login?registered";
+    @PostMapping("/api/auth/register")
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        registrationService.register(request.getUsername(), request.getPassword());
+        return ResponseEntity.status(HttpStatus.CREATED).body("User créé: " + request.getUsername());
     }
 }

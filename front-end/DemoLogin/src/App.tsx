@@ -1,8 +1,17 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { FormattedMessage, useIntl } from 'react-intl'
 import ProduitCard from './ProduitCard'
 import Login from './login'
 import AddProduct from './AddProduct'
+import EditProduct from './EditProduct'
+import { useLocale, type Locale } from './services/i18n'
 import './App.css'
+
+const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
+  { value: 'fr', label: 'Français' },
+  { value: 'en', label: 'English' },
+  { value: 'ar', label: 'العربية' },
+];
 
 interface Category {
   id: number;
@@ -17,12 +26,14 @@ interface Produit {
 
 type SortKey = 'newest' | 'oldest' | 'name-asc' | 'name-desc';
 
-const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'newest',    label: 'Newest First' },
-  { value: 'oldest',   label: 'Oldest First' },
-  { value: 'name-asc', label: 'Name A → Z'   },
-  { value: 'name-desc',label: 'Name Z → A'   },
+const SORT_OPTIONS: { value: SortKey; labelId: string }[] = [
+  { value: 'newest',    labelId: 'sort.newest'   },
+  { value: 'oldest',    labelId: 'sort.oldest'   },
+  { value: 'name-asc',  labelId: 'sort.nameAsc'  },
+  { value: 'name-desc', labelId: 'sort.nameDesc' },
 ];
+
+const PAGE_SIZE = 12;
 
 function App() {
   const [search, setSearch]           = useState("");
@@ -36,7 +47,12 @@ function App() {
   const [deleteMode, setDeleteMode]   = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [dark, setDark]               = useState(() => localStorage.getItem("theme") === "dark");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [editingProduct, setEditingProduct] = useState<Produit | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const intl = useIntl();
+  const { locale, setLocale } = useLocale();
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
@@ -108,6 +124,27 @@ function App() {
     }
   }, [produits, search, sortBy, categoryFilter]);
 
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, sortBy, categoryFilter]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((c) => Math.min(c + PAGE_SIZE, displayed.length));
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, displayed.length]);
+
+  const visibleProducts = useMemo(() => displayed.slice(0, visibleCount), [displayed, visibleCount]);
+
   const displayedIds = useMemo(() => displayed.map((p) => p.id), [displayed]);
   const allSelected  = displayedIds.length > 0 && displayedIds.every((id) => selectedIds.has(id));
 
@@ -170,7 +207,18 @@ function App() {
   return (
     <section id="center">
       <div className="page-header">
+        <h1><FormattedMessage id="common.appName" /> 🛒</h1>
         <div className="header-controls">
+          <select
+            className="locale-select"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            aria-label="Language"
+          >
+            {LOCALE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
           <button className="theme-toggle" onClick={() => setDark((d) => !d)} aria-label="Toggle theme">
             {dark ? (
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -188,16 +236,15 @@ function App() {
             onClick={() => { localStorage.removeItem("token"); setIsLoggedIn(false); }}
           >
             <span className="logout-icon">↩</span>
-            Logout
+            <FormattedMessage id="common.logout" />
           </button>
         </div>
-        <h1>Product Management 🛒</h1>
       </div>
 
       <div className="main-layout">
         <aside className="sidebar">
           <div className="sidebar-section">
-            <span className="filter-label">Sort by</span>
+            <span className="filter-label"><FormattedMessage id="sidebar.sortBy" /></span>
             <div className="filter-pills-col">
               {SORT_OPTIONS.map((opt) => (
                 <button
@@ -205,7 +252,7 @@ function App() {
                   className={`filter-pill${sortBy === opt.value ? ' active' : ''}`}
                   onClick={() => setSortBy(opt.value)}
                 >
-                  {opt.label}
+                  <FormattedMessage id={opt.labelId} />
                 </button>
               ))}
             </div>
@@ -213,13 +260,13 @@ function App() {
 
           {categories.length > 0 && (
             <div className="sidebar-section">
-              <span className="filter-label">Category</span>
+              <span className="filter-label"><FormattedMessage id="sidebar.category" /></span>
               <div className="filter-pills-col">
                 <button
                   className={`filter-pill${categoryFilter === 'all' ? ' active' : ''}`}
                   onClick={() => setCategoryFilter('all')}
                 >
-                  All
+                  <FormattedMessage id="sidebar.all" />
                 </button>
                 {categories.map((cat) => (
                   <button
@@ -282,7 +329,7 @@ function App() {
                       <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder="Search products..."
+                        placeholder={intl.formatMessage({ id: 'productList.searchPlaceholder' })}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
@@ -308,21 +355,33 @@ function App() {
 
           {/* Product grid */}
           <div className="product-grid">
-            {displayed.map((p) => (
+            {visibleProducts.map((p) => (
               <ProduitCard
                 key={p.id}
                 namePr={p.namePr}
                 categoryName={p.category?.NameCt ?? "—"}
                 onDelete={() => handleDelete(p.id)}
+                onEdit={() => setEditingProduct(p)}
                 deleteMode={deleteMode}
                 selected={selectedIds.has(p.id)}
                 onToggleSelect={() => toggleSelect(p.id)}
               />
             ))}
           </div>
-          {displayed.length === 0 && <p className="empty-state">No products found 🤷</p>}
+          {visibleCount < displayed.length && <div ref={sentinelRef} className="scroll-sentinel" />}
+          {displayed.length === 0 && (
+            <p className="empty-state"><FormattedMessage id="productList.noResults" /> 🤷</p>
+          )}
         </div>
       </div>
+
+      {editingProduct && (
+        <EditProduct
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onUpdated={fetchProduits}
+        />
+      )}
     </section>
   );
 }
