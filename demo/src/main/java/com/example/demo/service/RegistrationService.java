@@ -25,6 +25,7 @@ public class RegistrationService {
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setRole("ROLE_USER");
         repository.save(user);
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         return jwtService.generateToken(userDetails);

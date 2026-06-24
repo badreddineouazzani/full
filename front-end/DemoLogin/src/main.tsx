@@ -1,16 +1,20 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import './index.css'
-import App from './App.tsx'
+import { Provider } from 'react-redux'
+import { store } from './store'
 import { LocaleProvider } from './services/i18n'
+import App from './App.tsx'
+import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <LocaleProvider>
-        <App />
-      </LocaleProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <LocaleProvider>
+          <App />
+        </LocaleProvider>
+      </BrowserRouter>
+    </Provider>
   </StrictMode>,
 )

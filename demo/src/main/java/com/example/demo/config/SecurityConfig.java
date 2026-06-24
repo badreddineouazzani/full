@@ -41,17 +41,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/login", "/register", "/css/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/login", "/register", "/css/**", "/error").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/products").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
 
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                )
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN)) // 403 direct
         );
 //        http.
 //                authorizeHttpRequests(

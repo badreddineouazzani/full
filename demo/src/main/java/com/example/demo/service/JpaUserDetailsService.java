@@ -14,15 +14,21 @@ public class JpaUserDetailsService implements UserDetailsService {
 
     private final AppUserRepository repository;
 
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        AppUser user = repository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+//
+//        return org.springframework.security.core.userdetails.User
+//                .withUsername(user.getUsername())
+//                .password(user.getPassword())
+//                .roles("USER")
+//                .build();
+//    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = repository.findByUsername(username)
+        return repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles("USER")
-                .build();
     }
 }

@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: classpath:/db/changelog/changes/0.0.1-create-users-table.yml
+  - include:
+      file: classpath:/db/changelog/changes/0.0.2-add-role-to-users.yaml
