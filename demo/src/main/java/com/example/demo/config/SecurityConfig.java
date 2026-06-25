@@ -45,8 +45,9 @@ public class SecurityConfig {
 //                        .requestMatchers(HttpMethod.GET, "/products").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN", "EDITOR")
+                                .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN", "EDITOR")
                                 .anyRequest().authenticated()
 
                 )
