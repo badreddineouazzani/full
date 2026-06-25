@@ -37,7 +37,7 @@ function HomePage({ onLoggedOut, onOpenAdmin }: HomePageProps) {
   const dispatch = useAppDispatch()
   const intl = useIntl()
   const { locale, setLocale } = useLocale()
-  const { can } = useCurrentUser()
+  const { can, hasRole } = useCurrentUser()
 
   const {
     items, loading, error, sortBy, categoryFilter, search,
@@ -147,10 +147,12 @@ function HomePage({ onLoggedOut, onOpenAdmin }: HomePageProps) {
               <svg viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             )}
           </button>
-          <button className="logout-button" onClick={onOpenAdmin}>
-            <span className="logout-icon">🛡️</span>
-            <FormattedMessage id="admin.title" />
-          </button>
+          {hasRole('superadmin') && (
+            <button className="logout-button" onClick={onOpenAdmin}>
+              <span className="logout-icon">🛡️</span>
+              <FormattedMessage id="admin.title" />
+            </button>
+          )}
           <button className="logout-button" onClick={handleLogout}>
             <span className="logout-icon">↩</span>
             <FormattedMessage id="common.logout" />

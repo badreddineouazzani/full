@@ -2,11 +2,10 @@ import { useMemo } from 'react'
 import { ROLE_DEFAULTS, isRole, type Permission, type Role } from './roles'
 
 const TOKEN_KEY = 'token';
+const CACHED_ROLE_KEY = 'userRole';
 
-// Role assumed when the JWT carries no role claim (the current backend state).
-// Keep "viewer" for safety; switch to "superadmin" during local dev to exercise
-// every gated control until the backend signs a real role.
-const FALLBACK_ROLE: Role = 'superadmin';
+// Role assumed when neither the JWT nor the localStorage cache has a role.
+const FALLBACK_ROLE: Role = 'viewer';
 
 export interface CurrentUser {
   username: string;
@@ -56,8 +55,12 @@ function readCurrentUser(token: string | null): CurrentUser | null {
   if (!payload) return null;
 
   const username = typeof payload.sub === 'string' ? payload.sub : '';
+
+  // Prefer role from JWT claim, then fall back to the role cached after login,
+  // then FALLBACK_ROLE. The cached role is written by authSaga after /api/auth/me.
   const rawRole = extractRole(payload);
-  const role: Role = isRole(rawRole) ? rawRole : FALLBACK_ROLE;
+  const cachedRole = localStorage.getItem(CACHED_ROLE_KEY);
+  const role: Role = isRole(rawRole) ? rawRole : isRole(cachedRole) ? cachedRole : FALLBACK_ROLE;
 
   return { username, role, permissions: ROLE_DEFAULTS[role] };
 }

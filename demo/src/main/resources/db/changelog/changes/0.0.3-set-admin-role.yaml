@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.3
+      author: beo
+      changes:
+        - update:
+            tableName: users
+            where: username = 'admin'
+            columns:
+              - column:
+                  name: role
+                  value: ROLE_ADMIN

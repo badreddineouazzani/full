@@ -2,11 +2,12 @@ import { useEffect, useMemo } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
-  fetchRequest, setSearch, changeRoleRequest, togglePermissionRequest,
+  fetchRequest, setSearch, changeRoleRequest, saveRoleRequest, togglePermissionRequest,
 } from '../features/admin/adminSlice'
 import { logout } from '../features/auth/authSlice'
 import { ROLES, type Permission, type Role } from '../services/auth/roles'
 import { useLocale, type Locale } from '../services/i18n'
+import { useCurrentUser } from '../services/auth/useCurrentUser'
 import '../admin/Dashboard.css'
 
 const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
@@ -15,7 +16,7 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'ar', label: 'العربية' },
 ]
 
-const PERMISSIONS: { key: Permission; labelId: string }[] = [
+const ALL_PERMISSIONS: { key: Permission; labelId: string }[] = [
   { key: 'canAdd',    labelId: 'admin.perm.add'    },
   { key: 'canEdit',   labelId: 'admin.perm.edit'   },
   { key: 'canDelete', labelId: 'admin.perm.delete' },
@@ -30,7 +31,9 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
   const dispatch = useAppDispatch()
   const intl = useIntl()
   const { locale, setLocale } = useLocale()
-  const { users, search, loading, error } = useAppSelector((s) => s.admin)
+  const { users, search, loading, error, saving } = useAppSelector((s) => s.admin)
+  const { hasRole } = useCurrentUser()
+  const availableRoles = hasRole('superadmin') ? ROLES : ROLES.filter((r) => r !== 'superadmin')
 
   useEffect(() => {
     dispatch(fetchRequest())
@@ -45,7 +48,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return users
-    return users.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+    return users.filter((u) => u.name.toLowerCase().includes(q))
   }, [users, search])
 
   const handleLogout = () => { dispatch(logout()); onLoggedOut() }
@@ -106,9 +109,6 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
           value={search}
           onChange={(e) => dispatch(setSearch(e.target.value))}
         />
-        <button className="admin-invite-btn" type="button">
-          ＋ <FormattedMessage id="admin.inviteUser" />
-        </button>
       </div>
 
       <div className="admin-table-wrap">
@@ -118,6 +118,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
               <th><FormattedMessage id="admin.col.user" /></th>
               <th><FormattedMessage id="admin.col.role" /></th>
               <th><FormattedMessage id="admin.col.permissions" /></th>
+              <th><FormattedMessage id="admin.col.actions" defaultMessage="Actions" /></th>
             </tr>
           </thead>
           <tbody>
@@ -126,10 +127,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                 <td>
                   <div className="admin-user-cell">
                     <span className="admin-avatar">{u.name.charAt(0)}</span>
-                    <div>
-                      <div className="admin-user-name">{u.name}</div>
-                      <div className="admin-user-email">{u.email}</div>
-                    </div>
+                    <div className="admin-user-name">{u.name}</div>
                   </div>
                 </td>
                 <td>
@@ -138,14 +136,14 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                     value={u.role}
                     onChange={(e) => dispatch(changeRoleRequest({ id: u.id, role: e.target.value as Role }))}
                   >
-                    {ROLES.map((r) => (
+                    {availableRoles.map((r) => (
                       <option key={r} value={r}>{intl.formatMessage({ id: `admin.role.${r}` })}</option>
                     ))}
                   </select>
                 </td>
                 <td>
                   <div className="perm-toggles">
-                    {PERMISSIONS.map((p) => (
+                    {ALL_PERMISSIONS.map((p) => (
                       <label key={p.key} className="perm-toggle">
                         <input
                           type="checkbox"
@@ -157,6 +155,17 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                       </label>
                     ))}
                   </div>
+                </td>
+                <td>
+                  <button
+                    className="admin-save-btn"
+                    disabled={saving[u.id] === true}
+                    onClick={() => dispatch(saveRoleRequest(u.id))}
+                  >
+                    {saving[u.id] === true
+                      ? intl.formatMessage({ id: 'admin.saving', defaultMessage: 'Saving…' })
+                      : intl.formatMessage({ id: 'admin.save', defaultMessage: 'Save' })}
+                  </button>
                 </td>
               </tr>
             ))}

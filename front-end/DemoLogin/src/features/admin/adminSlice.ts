@@ -14,6 +14,7 @@ interface AdminState {
   search: string
   loading: boolean
   error: string | null
+  saving: Record<number, boolean>
 }
 
 const initialState: AdminState = {
@@ -21,6 +22,7 @@ const initialState: AdminState = {
   search: '',
   loading: false,
   error: null,
+  saving: {},
 }
 
 const adminSlice = createSlice({
@@ -44,7 +46,6 @@ const adminSlice = createSlice({
       state.search = action.payload
     },
 
-    // Role change: optimistic update in the reducer, persisted by the saga.
     changeRoleRequest(state, action: PayloadAction<{ id: number; role: Role }>) {
       state.error = null
       const user = state.users.find((u) => u.id === action.payload.id)
@@ -53,18 +54,31 @@ const adminSlice = createSlice({
         user.permissions = { ...ROLE_DEFAULTS[action.payload.role] }
       }
     },
-    changeRoleFailure(state, action: PayloadAction<string>) {
-      state.error = action.payload
+
+    saveRoleRequest(state, action: PayloadAction<number>) {
+      state.saving[action.payload] = true
+      state.error = null
+    },
+    saveRoleSuccess(state, action: PayloadAction<number>) {
+      state.saving[action.payload] = false
+    },
+    saveRoleFailure(state, action: PayloadAction<{ id: number; message: string }>) {
+      state.saving[action.payload.id] = false
+      state.error = action.payload.message
     },
 
-    // Permission toggle: optimistic update in the reducer, persisted by the saga.
     togglePermissionRequest(state, action: PayloadAction<{ id: number; perm: Permission }>) {
       state.error = null
       const user = state.users.find((u) => u.id === action.payload.id)
-      if (user) user.permissions[action.payload.perm] = !user.permissions[action.payload.perm]
-    },
-    togglePermissionFailure(state, action: PayloadAction<string>) {
-      state.error = action.payload
+      if (!user) return
+      user.permissions[action.payload.perm] = !user.permissions[action.payload.perm]
+      // Sync role from permissions (superadmin is only set via dropdown, never by toggles)
+      if (user.role !== 'superadmin') {
+        const { canAdd, canEdit, canDelete } = user.permissions
+        if (!canAdd && !canEdit && !canDelete) user.role = 'viewer'
+        else if (canAdd && canEdit && canDelete) user.role = 'admin'
+        else user.role = 'editor'
+      }
     },
   },
 })
@@ -72,8 +86,9 @@ const adminSlice = createSlice({
 export const {
   fetchRequest, fetchSuccess, fetchFailure,
   setSearch,
-  changeRoleRequest, changeRoleFailure,
-  togglePermissionRequest, togglePermissionFailure,
+  changeRoleRequest,
+  saveRoleRequest, saveRoleSuccess, saveRoleFailure,
+  togglePermissionRequest,
 } = adminSlice.actions
 
 export default adminSlice.reducer

@@ -90,6 +90,34 @@
   opacity: 0.9;
 }
 
+.admin-save-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  height: 32px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.admin-save-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.admin-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.perm-none {
+  color: var(--text-muted, #aaa);
+  font-size: 14px;
+}
+
 /* ── Table ────────────────────────────────────────────────────────────── */
 .admin-table-wrap {
   background: var(--bg);

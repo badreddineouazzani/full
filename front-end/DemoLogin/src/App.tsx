@@ -7,8 +7,7 @@ import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import SuperAdminPage from './pages/SuperAdminPage'
 
-// Flip to true once the backend JWT carries a role claim.
-const ENFORCE_ADMIN_ROLE = false
+const ENFORCE_ADMIN_ROLE = true
 
 function LoginRoute() {
   const navigate = useNavigate()
