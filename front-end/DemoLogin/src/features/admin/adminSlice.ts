@@ -12,43 +12,68 @@ export interface AdminUser {
 interface AdminState {
   users: AdminUser[]
   search: string
+  loading: boolean
+  error: string | null
 }
 
-// TODO: replace with GET /api/admin/users once the backend is ready.
-const MOCK_USERS: AdminUser[] = [
-  { id: 1, name: 'Sara Idrissi',    email: 'sara@example.com',    role: 'superadmin', permissions: ROLE_DEFAULTS.superadmin },
-  { id: 2, name: 'Youssef Alami',   email: 'youssef@example.com', role: 'admin',      permissions: ROLE_DEFAULTS.admin },
-  { id: 3, name: 'Lina Benani',     email: 'lina@example.com',    role: 'editor',     permissions: ROLE_DEFAULTS.editor },
-  { id: 4, name: 'Omar Fassi',      email: 'omar@example.com',    role: 'editor',     permissions: { canAdd: true, canEdit: false, canDelete: false } },
-  { id: 5, name: 'Nadia Cherkaoui', email: 'nadia@example.com',   role: 'viewer',     permissions: ROLE_DEFAULTS.viewer },
-]
-
 const initialState: AdminState = {
-  users: MOCK_USERS,
+  users: [],
   search: '',
+  loading: false,
+  error: null,
 }
 
 const adminSlice = createSlice({
   name: 'admin',
   initialState,
   reducers: {
+    fetchRequest(state) {
+      state.loading = true
+      state.error = null
+    },
+    fetchSuccess(state, action: PayloadAction<AdminUser[]>) {
+      state.loading = false
+      state.users = action.payload
+    },
+    fetchFailure(state, action: PayloadAction<string>) {
+      state.loading = false
+      state.error = action.payload
+    },
+
     setSearch(state, action: PayloadAction<string>) {
       state.search = action.payload
     },
-    // TODO: dispatch these then PATCH /api/admin/users/:id when wiring the backend.
-    changeRole(state, action: PayloadAction<{ id: number; role: Role }>) {
+
+    // Role change: optimistic update in the reducer, persisted by the saga.
+    changeRoleRequest(state, action: PayloadAction<{ id: number; role: Role }>) {
+      state.error = null
       const user = state.users.find((u) => u.id === action.payload.id)
       if (user) {
         user.role = action.payload.role
         user.permissions = { ...ROLE_DEFAULTS[action.payload.role] }
       }
     },
-    togglePermission(state, action: PayloadAction<{ id: number; perm: Permission }>) {
+    changeRoleFailure(state, action: PayloadAction<string>) {
+      state.error = action.payload
+    },
+
+    // Permission toggle: optimistic update in the reducer, persisted by the saga.
+    togglePermissionRequest(state, action: PayloadAction<{ id: number; perm: Permission }>) {
+      state.error = null
       const user = state.users.find((u) => u.id === action.payload.id)
       if (user) user.permissions[action.payload.perm] = !user.permissions[action.payload.perm]
+    },
+    togglePermissionFailure(state, action: PayloadAction<string>) {
+      state.error = action.payload
     },
   },
 })
 
-export const { setSearch, changeRole, togglePermission } = adminSlice.actions
+export const {
+  fetchRequest, fetchSuccess, fetchFailure,
+  setSearch,
+  changeRoleRequest, changeRoleFailure,
+  togglePermissionRequest, togglePermissionFailure,
+} = adminSlice.actions
+
 export default adminSlice.reducer

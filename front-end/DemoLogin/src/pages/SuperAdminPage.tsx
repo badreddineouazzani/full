@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { setSearch, changeRole, togglePermission } from '../features/admin/adminSlice'
+import {
+  fetchRequest, setSearch, changeRoleRequest, togglePermissionRequest,
+} from '../features/admin/adminSlice'
 import { logout } from '../features/auth/authSlice'
 import { ROLES, type Permission, type Role } from '../services/auth/roles'
 import { useLocale, type Locale } from '../services/i18n'
@@ -28,7 +30,11 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
   const dispatch = useAppDispatch()
   const intl = useIntl()
   const { locale, setLocale } = useLocale()
-  const { users, search } = useAppSelector((s) => s.admin)
+  const { users, search, loading, error } = useAppSelector((s) => s.admin)
+
+  useEffect(() => {
+    dispatch(fetchRequest())
+  }, [dispatch])
 
   const stats = useMemo(() => {
     const byRole: Record<Role, number> = { superadmin: 0, admin: 0, editor: 0, viewer: 0 }
@@ -130,7 +136,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                   <select
                     className={`role-select role-${u.role}`}
                     value={u.role}
-                    onChange={(e) => dispatch(changeRole({ id: u.id, role: e.target.value as Role }))}
+                    onChange={(e) => dispatch(changeRoleRequest({ id: u.id, role: e.target.value as Role }))}
                   >
                     {ROLES.map((r) => (
                       <option key={r} value={r}>{intl.formatMessage({ id: `admin.role.${r}` })}</option>
@@ -144,7 +150,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                         <input
                           type="checkbox"
                           checked={u.permissions[p.key]}
-                          onChange={() => dispatch(togglePermission({ id: u.id, perm: p.key }))}
+                          onChange={() => dispatch(togglePermissionRequest({ id: u.id, perm: p.key }))}
                         />
                         <span className="perm-track"><span className="perm-thumb" /></span>
                         <span className="perm-name"><FormattedMessage id={p.labelId} /></span>
@@ -156,7 +162,13 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && (
+        {loading && (
+          <p className="empty-state"><FormattedMessage id="admin.loading" defaultMessage="Loading users…" /></p>
+        )}
+        {!loading && error && (
+          <p className="empty-state">⚠️ {error}</p>
+        )}
+        {!loading && !error && filtered.length === 0 && (
           <p className="empty-state"><FormattedMessage id="admin.noResults" /> 🤷</p>
         )}
       </div>

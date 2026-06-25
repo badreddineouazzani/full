@@ -57,17 +57,6 @@ public class SecurityConfig {
                 .accessDeniedHandler((request, response, accessDeniedException) ->
                         response.sendError(HttpServletResponse.SC_FORBIDDEN)) // 403 direct
         );
-//        http.
-//                authorizeHttpRequests(
-//                        auth->auth.requestMatchers("/login","/register", "/css/**")
-//                                .permitAll().anyRequest().authenticated()
-//                )
-//                .formLogin(
-//                        form->form.loginPage("/login").defaultSuccessUrl("/", true)
-//                )
-//                .logout(
-//                        form->form.logoutSuccessUrl("/login?logout")
-//                );//.csrf(csrf->csrf.disable());
         return http.build();
 
     }
