@@ -30,16 +30,34 @@ public class AppUser implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
+
+    // Per-user product permissions. These are the source of truth for what a user
+    // may do to products; the role is kept for dashboard access and as a preset.
+    @Column(nullable = false)
+    private boolean canAdd;
+
+    @Column(nullable = false)
+    private boolean canEdit;
+
+    @Column(nullable = false)
+    private boolean canDelete;
+
+    // Soft-delete flag. A deleted user is hidden from the admin dashboard and,
+    // via isEnabled() below, can no longer authenticate.
+    @Column(nullable = false)
+    private boolean deleted;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role));
+        // role.name() == the authority string (e.g. "ROLE_ADMIN"), so hasRole('ADMIN') matches.
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override public boolean isEnabled() { return !deleted; }
 }

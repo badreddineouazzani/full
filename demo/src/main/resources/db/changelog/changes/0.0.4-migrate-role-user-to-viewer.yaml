@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.4
+      author: beo
+      comment: >-
+        Move the schema to the 4 canonical roles. Existing ROLE_USER rows become
+        ROLE_VIEWER, and the column default is retargeted so DB-level inserts stay
+        valid under the CHECK constraint added in 0.0.5. Must run before 0.0.5.
+      changes:
+        - update:
+            tableName: users
+            columns:
+              - column:
+                  name: role
+                  value: ROLE_VIEWER
+            where: role = 'ROLE_USER'
+        - dropDefaultValue:
+            tableName: users
+            columnName: role
+            columnDataType: varchar(50)
+        - addDefaultValue:
+            tableName: users
+            columnName: role
+            columnDataType: varchar(50)
+            defaultValue: ROLE_VIEWER

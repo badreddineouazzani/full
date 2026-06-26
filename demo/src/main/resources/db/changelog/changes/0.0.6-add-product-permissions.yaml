@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.6
+      author: beo
+      comment: >-
+        Add per-user product permissions (canAdd / canEdit / canDelete) so access
+        can be granted individually instead of being implied by the role. Existing
+        rows are backfilled from their role so behaviour is unchanged on upgrade.
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: canAdd
+                  type: bit
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: canEdit
+                  type: bit
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: canDelete
+                  type: bit
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        # Backfill from role: admins/superadmins get everything...
+        - update:
+            tableName: users
+            columns:
+              - column: { name: canAdd, valueBoolean: true }
+              - column: { name: canEdit, valueBoolean: true }
+              - column: { name: canDelete, valueBoolean: true }
+            where: role IN ('ROLE_SUPERADMIN', 'ROLE_ADMIN')
+        # ...editors get add + edit (no delete)...
+        - update:
+            tableName: users
+            columns:
+              - column: { name: canAdd, valueBoolean: true }
+              - column: { name: canEdit, valueBoolean: true }
+              - column: { name: canDelete, valueBoolean: false }
+            where: role = 'ROLE_EDITOR'
+        # ...viewers keep the all-false default.
+      rollback:
+        - dropColumn: { tableName: users, columnName: canAdd }
+        - dropColumn: { tableName: users, columnName: canEdit }
+        - dropColumn: { tableName: users, columnName: canDelete }

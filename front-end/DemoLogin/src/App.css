@@ -9,19 +9,23 @@
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  height: 36px;
+  height: 32px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.locale-select:hover,
+.locale-select:hover {
+  background: var(--hover);
+}
+
 .locale-select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
   outline: none;
 }
 
@@ -29,15 +33,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
-  color: var(--text-h);
+  color: var(--text);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
 .theme-toggle svg {
@@ -47,8 +51,8 @@
 }
 
 .theme-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--hover);
+  color: var(--text-h);
 }
 
 .theme-toggle:hover svg {
@@ -62,20 +66,18 @@
   font: inherit;
   font-size: 14px;
   font-weight: 500;
-  padding: 0 14px;
-  height: 36px;
-  border-radius: 8px;
+  padding: 0 12px;
+  height: 32px;
+  border-radius: 6px;
   color: var(--text-h);
   background: var(--bg);
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .logout-button:hover {
-  color: #ef4444;
-  border-color: #ef4444;
-  box-shadow: var(--shadow);
+  background: var(--hover);
 }
 
 .logout-icon {
@@ -132,12 +134,12 @@
   font-weight: 500;
   padding: 0 12px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .delete-mode-btn svg {
@@ -147,9 +149,9 @@
 }
 
 .delete-mode-btn:hover {
-  color: #ef4444;
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.06);
+  color: #eb5757;
+  border-color: rgba(235, 87, 87, 0.3);
+  background: rgba(235, 87, 87, 0.08);
 }
 
 /* Delete mode — select all row */
@@ -174,18 +176,18 @@
 .delete-selected-btn {
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0 14px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #fff;
-  background: #ef4444;
+  background: #eb5757;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.05s;
+  transition: filter 0.15s, transform 0.05s;
 }
 
-.delete-selected-btn:hover { opacity: 0.88; }
+.delete-selected-btn:hover { filter: brightness(0.94); }
 .delete-selected-btn:active { transform: translateY(1px); }
 
 .cancel-delete-btn {
@@ -194,15 +196,15 @@
   font-weight: 500;
   padding: 0 12px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
-.cancel-delete-btn:hover { background: var(--code-bg); }
+.cancel-delete-btn:hover { background: var(--hover); }
 
 /* Card — delete mode */
 .product-card.delete-mode {
@@ -216,8 +218,8 @@
 }
 
 .product-card.selected {
-  outline: 2px solid #ef4444;
-  background: rgba(239, 68, 68, 0.04);
+  outline: 2px solid #eb5757;
+  background: rgba(235, 87, 87, 0.05);
 }
 
 .card-checkbox {
@@ -257,7 +259,7 @@
               opacity 0.25s ease;
   background: var(--bg);
   border: 1px solid transparent;
-  border-radius: 10px 0 0 10px;
+  border-radius: 6px 0 0 6px;
   padding: 0;
 }
 
@@ -323,7 +325,7 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
@@ -334,7 +336,7 @@
 
 .inline-search.open .search-icon-btn {
   border-left: none;
-  border-radius: 0 10px 10px 0;
+  border-radius: 0 6px 6px 0;
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-bg);
@@ -354,7 +356,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  gap: 16px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -367,32 +369,31 @@
 .product-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 20px;
+  gap: 12px;
+  padding: 12px;
   box-sizing: border-box;
   overflow: hidden;
   text-align: left;
   background: var(--bg);
-  border: 1px solid var(--border);
-  border-top: 4px solid var(--cat-color, var(--accent));
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  box-shadow: rgba(15, 15, 15, 0.04) 0 1px 2px;
+  transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 
 .product-card:hover {
-  transform: translateY(-3px);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 22%, transparent);
 }
 
 .product-thumb {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
-  border-radius: 10px;
-  background: var(--cat-bg, var(--accent-bg));
+  font-size: 44px;
+  border-radius: 6px;
+  background: var(--cat-bg, var(--code-bg));
 }
 
 .product-info {
@@ -404,7 +405,7 @@
 
 .product-name {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.3;
   color: var(--text-h);
@@ -414,13 +415,13 @@
 .product-category {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--cat-color, var(--accent));
-  background: var(--cat-bg, var(--accent-bg));
-  border-radius: 8px;
-  padding: 5px 12px;
+  color: var(--cat-color, var(--text));
+  background: var(--cat-bg, var(--code-bg));
+  border-radius: 4px;
+  padding: 2px 8px;
   width: fit-content;
   max-width: 100%;
 }
@@ -451,23 +452,23 @@
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  padding: 9px 8px;
-  border-radius: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
   background: transparent;
   border: 1px solid var(--border);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(6px);
-  transition: color 0.2s, background 0.2s, border-color 0.2s,
+  transform: translateY(4px);
+  transition: color 0.15s, background 0.15s, border-color 0.15s,
               opacity 0.2s ease, transform 0.2s ease;
 }
 
 .edit-button {
-  color: var(--accent);
+  color: var(--text-h);
 }
 
 .delete-button {
-  color: #ef4444;
+  color: #eb5757;
 }
 
 .product-card:hover .edit-button,
@@ -477,15 +478,14 @@
 }
 
 .edit-button:hover {
-  color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
+  color: var(--text-h);
+  background: var(--hover);
 }
 
 .delete-button:hover {
-  color: #fff;
-  background: #ef4444;
-  border-color: #ef4444;
+  color: #eb5757;
+  background: rgba(235, 87, 87, 0.08);
+  border-color: rgba(235, 87, 87, 0.3);
 }
 
 .edit-button:active,
@@ -516,7 +516,7 @@
   box-sizing: border-box;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
   text-align: left;
 }
@@ -638,14 +638,13 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
   width: 200px;
   flex-shrink: 0;
-  padding: 20px 16px;
-  background: var(--bg);
+  padding: 16px 12px;
+  background: var(--bg-sidebar);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
   position: sticky;
   top: 24px;
 }
@@ -672,30 +671,29 @@
 
 .filter-pill {
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid transparent;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
   background: transparent;
   color: var(--text);
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .filter-pill:hover {
-  background: var(--accent-bg);
-  color: var(--accent);
+  background: var(--hover);
+  color: var(--text-h);
 }
 
 .filter-pill.active {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--hover);
+  color: var(--text-h);
   font-weight: 600;
 }
 
@@ -716,26 +714,23 @@
   gap: 6px;
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
-  padding: 0 14px;
+  font-weight: 500;
+  padding: 0 12px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #fff;
   background: var(--accent);
   cursor: pointer;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
-  transition: opacity 0.2s, transform 0.05s, box-shadow 0.2s;
+  transition: filter 0.15s, transform 0.05s;
 }
 
 .add-product-trigger:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 40%, transparent);
+  filter: brightness(0.94);
 }
 
 .add-product-trigger:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 /* ── Modal ── */
@@ -761,8 +756,10 @@
   max-width: 420px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  border-radius: 10px;
+  box-shadow:
+    rgba(15, 15, 15, 0.05) 0 0 0 1px, rgba(15, 15, 15, 0.1) 0 5px 10px,
+    rgba(15, 15, 15, 0.2) 0 15px 40px;
   padding: 28px 32px;
   box-sizing: border-box;
   animation: slideUp 0.18s ease;

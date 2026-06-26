@@ -5,3 +5,11 @@ databaseChangeLog:
       file: classpath:/db/changelog/changes/0.0.2-add-role-to-users.yaml
   - include:
       file: classpath:/db/changelog/changes/0.0.3-set-admin-role.yaml
+  - include:
+      file: classpath:/db/changelog/changes/0.0.4-migrate-role-user-to-viewer.yaml
+  - include:
+      file: classpath:/db/changelog/changes/0.0.5-add-role-check-constraint.yaml
+  - include:
+      file: classpath:/db/changelog/changes/0.0.6-add-product-permissions.yaml
+  - include:
+      file: classpath:/db/changelog/changes/0.0.7-add-soft-delete-to-users.yaml

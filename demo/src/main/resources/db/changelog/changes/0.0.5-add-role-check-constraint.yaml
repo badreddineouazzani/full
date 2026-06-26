@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.5
+      author: beo
+      comment: >-
+        Restrict users.role to the 4 canonical roles. Raw SQL is used because the
+        OSS addCheckConstraint change type is Liquibase Pro only.
+      changes:
+        - sql:
+            sql: >-
+              ALTER TABLE users ADD CONSTRAINT CK_users_role
+              CHECK (role IN ('ROLE_SUPERADMIN', 'ROLE_ADMIN', 'ROLE_EDITOR', 'ROLE_VIEWER'))
+      rollback:
+        - sql:
+            sql: ALTER TABLE users DROP CONSTRAINT CK_users_role

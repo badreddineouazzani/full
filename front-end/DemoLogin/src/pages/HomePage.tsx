@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   fetchRequest, setSortBy, setCategoryFilter, setSearch,
-  increaseVisible, setEditingProduct, setDeleteMode,
+  setEditingProduct, setDeleteMode,
   toggleSelected, setSelectedIds, deleteRequest, deleteManyRequest,
   type SortKey,
 } from '../features/products/productsSlice'
@@ -11,6 +11,7 @@ import { logout } from '../features/auth/authSlice'
 import ProduitCard from '../components/ProduitCard'
 import AddProduct from '../components/AddProduct'
 import EditProduct from '../components/EditProduct'
+import Pagination from '../components/Pagination'
 import { useLocale, type Locale } from '../services/i18n'
 import { useCurrentUser } from '../services/auth/useCurrentUser'
 import '../App.css'
@@ -41,15 +42,15 @@ function HomePage({ onLoggedOut, onOpenAdmin }: HomePageProps) {
 
   const {
     items, loading, error, sortBy, categoryFilter, search,
-    visibleCount, editingProduct, deleteMode, selectedIds,
+    editingProduct, deleteMode, selectedIds,
   } = useAppSelector((s) => s.products)
 
   const { token } = useAppSelector((s) => s.auth)
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+  const [page, setPage] = useState(1)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const sentinelRef = useRef<HTMLDivElement>(null)
 
   const canAdd    = can('canAdd')
   const canEdit   = can('canEdit')
@@ -99,18 +100,16 @@ function HomePage({ onLoggedOut, onOpenAdmin }: HomePageProps) {
     }
   }, [items, search, sortBy, categoryFilter])
 
-  useEffect(() => {
-    const el = sentinelRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) dispatch(increaseVisible(displayed.length)) },
-      { rootMargin: '300px' }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [visibleCount, displayed.length, dispatch])
+  // Reset to the first page whenever the filtered result set changes.
+  useEffect(() => { setPage(1) }, [search, sortBy, categoryFilter])
 
-  const visibleProducts = useMemo(() => displayed.slice(0, visibleCount), [displayed, visibleCount])
+  const PRODUCTS_PER_PAGE = 12
+  const pageCount = Math.max(1, Math.ceil(displayed.length / PRODUCTS_PER_PAGE))
+  const currentPage = Math.min(page, pageCount)
+  const visibleProducts = useMemo(
+    () => displayed.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
+    [displayed, currentPage]
+  )
   const displayedIds    = useMemo(() => displayed.map((p) => p.id), [displayed])
   const selectedSet     = useMemo(() => new Set(selectedIds), [selectedIds])
   const allSelected     = displayedIds.length > 0 && displayedIds.every((id) => selectedSet.has(id))
@@ -274,10 +273,10 @@ function HomePage({ onLoggedOut, onOpenAdmin }: HomePageProps) {
               />
             ))}
           </div>
-          {visibleCount < displayed.length && <div ref={sentinelRef} className="scroll-sentinel" />}
           {displayed.length === 0 && (
             <p className="empty-state"><FormattedMessage id="productList.noResults" /> 🤷</p>
           )}
+          <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
         </div>
       </div>
 

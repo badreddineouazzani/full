@@ -49,6 +49,22 @@ function extractRole(payload: Record<string, unknown>): string | null {
   return null;
 }
 
+// Read the per-user product permissions from the JWT claims. Falls back to the
+// role's defaults for older tokens that don't carry permission claims yet.
+function extractPermissions(
+  payload: Record<string, unknown>,
+  role: Role
+): Record<Permission, boolean> {
+  const keys: Permission[] = ['canAdd', 'canEdit', 'canDelete'];
+  const hasClaims = keys.some((k) => typeof payload[k] === 'boolean');
+  if (!hasClaims) return ROLE_DEFAULTS[role];
+  return {
+    canAdd: payload.canAdd === true,
+    canEdit: payload.canEdit === true,
+    canDelete: payload.canDelete === true,
+  };
+}
+
 function readCurrentUser(token: string | null): CurrentUser | null {
   if (!token) return null;
   const payload = decodeJwtPayload(token);
@@ -62,7 +78,7 @@ function readCurrentUser(token: string | null): CurrentUser | null {
   const cachedRole = localStorage.getItem(CACHED_ROLE_KEY);
   const role: Role = isRole(rawRole) ? rawRole : isRole(cachedRole) ? cachedRole : FALLBACK_ROLE;
 
-  return { username, role, permissions: ROLE_DEFAULTS[role] };
+  return { username, role, permissions: extractPermissions(payload, role) };
 }
 
 /**

@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +28,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // enables @PreAuthorize on controller methods/classes
 @RequiredArgsConstructor
 
 public class SecurityConfig {
@@ -45,9 +47,9 @@ public class SecurityConfig {
 //                        .requestMatchers(HttpMethod.GET, "/products").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN", "EDITOR")
-                                .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SUPERADMIN", "ADMIN", "EDITOR")
+                                // Product mutations are authorized per-user via @PreAuthorize
+                                // on ProductController (canAdd / canEdit / canDelete), so here
+                                // we only require an authenticated caller.
                                 .anyRequest().authenticated()
 
                 )

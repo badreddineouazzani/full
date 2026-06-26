@@ -67,18 +67,27 @@ const adminSlice = createSlice({
       state.error = action.payload.message
     },
 
+    deleteUserRequest(state, action: PayloadAction<number>) {
+      state.saving[action.payload] = true
+      state.error = null
+    },
+    deleteUserSuccess(state, action: PayloadAction<number>) {
+      delete state.saving[action.payload]
+      state.users = state.users.filter((u) => u.id !== action.payload)
+    },
+    deleteUserFailure(state, action: PayloadAction<{ id: number; message: string }>) {
+      state.saving[action.payload.id] = false
+      state.error = action.payload.message
+    },
+
     togglePermissionRequest(state, action: PayloadAction<{ id: number; perm: Permission }>) {
       state.error = null
       const user = state.users.find((u) => u.id === action.payload.id)
       if (!user) return
+      // Permissions are now independent of the role — flip just this one.
+      // The role stays whatever the dropdown selected (it's used for dashboard
+      // access and as a preset, not to imply product permissions).
       user.permissions[action.payload.perm] = !user.permissions[action.payload.perm]
-      // Sync role from permissions (superadmin is only set via dropdown, never by toggles)
-      if (user.role !== 'superadmin') {
-        const { canAdd, canEdit, canDelete } = user.permissions
-        if (!canAdd && !canEdit && !canDelete) user.role = 'viewer'
-        else if (canAdd && canEdit && canDelete) user.role = 'admin'
-        else user.role = 'editor'
-      }
     },
   },
 })
@@ -88,6 +97,7 @@ export const {
   setSearch,
   changeRoleRequest,
   saveRoleRequest, saveRoleSuccess, saveRoleFailure,
+  deleteUserRequest, deleteUserSuccess, deleteUserFailure,
   togglePermissionRequest,
 } = adminSlice.actions
 

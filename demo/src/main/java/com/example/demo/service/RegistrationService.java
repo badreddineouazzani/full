@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.AppUser;
+import com.example.demo.entity.Role;
 import com.example.demo.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,8 @@ public class RegistrationService {
         AppUser user = new AppUser();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setRole("ROLE_USER");
+        user.setRole(Role.ROLE_VIEWER); // self-registration grants the least-privileged role
+
         repository.save(user);
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         return jwtService.generateToken(userDetails);

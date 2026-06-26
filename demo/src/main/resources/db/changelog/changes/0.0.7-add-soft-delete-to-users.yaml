@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.7
+      author: beo
+      comment: >-
+        Add a soft-delete flag to users. Deleting a user from the admin dashboard
+        sets this flag instead of removing the row; flagged users are hidden from
+        the dashboard and can no longer authenticate.
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: deleted
+                  type: bit
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropColumn: { tableName: users, columnName: deleted }

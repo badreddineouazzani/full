@@ -1,8 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
+import Pagination from '../components/Pagination'
 import {
   fetchRequest, setSearch, changeRoleRequest, saveRoleRequest, togglePermissionRequest,
+  deleteUserRequest,
 } from '../features/admin/adminSlice'
 import { logout } from '../features/auth/authSlice'
 import { ROLES, type Permission, type Role } from '../services/auth/roles'
@@ -50,6 +52,12 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
     if (!q) return users
     return users.filter((u) => u.name.toLowerCase().includes(q))
   }, [users, search])
+
+  const USERS_PER_PAGE = 8
+  const [page, setPage] = useState(1)
+  const pageCount = Math.max(1, Math.ceil(filtered.length / USERS_PER_PAGE))
+  const currentPage = Math.min(page, pageCount)
+  const pageUsers = filtered.slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE)
 
   const handleLogout = () => { dispatch(logout()); onLoggedOut() }
 
@@ -107,7 +115,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
           type="text"
           placeholder={intl.formatMessage({ id: 'admin.searchPlaceholder' })}
           value={search}
-          onChange={(e) => dispatch(setSearch(e.target.value))}
+          onChange={(e) => { dispatch(setSearch(e.target.value)); setPage(1) }}
         />
       </div>
 
@@ -122,7 +130,7 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((u) => (
+            {pageUsers.map((u) => (
               <tr key={u.id}>
                 <td>
                   <div className="admin-user-cell">
@@ -157,15 +165,30 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
                   </div>
                 </td>
                 <td>
-                  <button
-                    className="admin-save-btn"
-                    disabled={saving[u.id] === true}
-                    onClick={() => dispatch(saveRoleRequest(u.id))}
-                  >
-                    {saving[u.id] === true
-                      ? intl.formatMessage({ id: 'admin.saving', defaultMessage: 'Saving…' })
-                      : intl.formatMessage({ id: 'admin.save', defaultMessage: 'Save' })}
-                  </button>
+                  <div className="admin-row-actions">
+                    <button
+                      className="admin-save-btn"
+                      disabled={saving[u.id] === true}
+                      onClick={() => dispatch(saveRoleRequest(u.id))}
+                    >
+                      {saving[u.id] === true
+                        ? intl.formatMessage({ id: 'admin.saving', defaultMessage: 'Saving…' })
+                        : intl.formatMessage({ id: 'admin.save', defaultMessage: 'Save' })}
+                    </button>
+                    <button
+                      className="admin-delete-btn"
+                      disabled={saving[u.id] === true}
+                      onClick={() => {
+                        const msg = intl.formatMessage(
+                          { id: 'admin.confirmDelete', defaultMessage: 'Delete user "{name}"? This cannot be undone.' },
+                          { name: u.name }
+                        )
+                        if (window.confirm(msg)) dispatch(deleteUserRequest(u.id))
+                      }}
+                    >
+                      {intl.formatMessage({ id: 'admin.delete', defaultMessage: 'Delete' })}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -179,6 +202,9 @@ function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
         )}
         {!loading && !error && filtered.length === 0 && (
           <p className="empty-state"><FormattedMessage id="admin.noResults" /> 🤷</p>
+        )}
+        {!loading && !error && (
+          <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
         )}
       </div>
     </section>

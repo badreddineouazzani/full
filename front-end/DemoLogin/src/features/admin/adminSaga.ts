@@ -3,6 +3,7 @@ import {
   fetchRequest, fetchSuccess, fetchFailure,
   changeRoleRequest,
   saveRoleRequest, saveRoleSuccess, saveRoleFailure,
+  deleteUserRequest, deleteUserSuccess, deleteUserFailure,
   togglePermissionRequest,
   type AdminUser,
 } from './adminSlice'
@@ -18,20 +19,36 @@ function getToken() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeUser(raw: any): AdminUser {
-  const roles: string[] = Array.isArray(raw.roles) ? raw.roles : []
-  const role: Role = roles.includes('ROLE_SUPERADMIN')
+  // UserResponse serializes `role` as a single authority string, e.g. "ROLE_ADMIN".
+  // (Tolerate an older `roles` array shape too.)
+  const authority: string =
+    typeof raw.role === 'string'
+      ? raw.role
+      : Array.isArray(raw.roles) && typeof raw.roles[0] === 'string'
+      ? raw.roles[0]
+      : 'ROLE_VIEWER'
+  const role: Role = authority === 'ROLE_SUPERADMIN'
     ? 'superadmin'
-    : roles.includes('ROLE_ADMIN')
+    : authority === 'ROLE_ADMIN'
     ? 'admin'
-    : roles.includes('ROLE_EDITOR')
+    : authority === 'ROLE_EDITOR'
     ? 'editor'
     : 'viewer'
+  // Use the per-user permission flags from the backend; fall back to the role's
+  // defaults only for older payloads that don't include them.
+  const hasPerms =
+    typeof raw.canAdd === 'boolean' ||
+    typeof raw.canEdit === 'boolean' ||
+    typeof raw.canDelete === 'boolean'
+  const permissions = hasPerms
+    ? { canAdd: raw.canAdd === true, canEdit: raw.canEdit === true, canDelete: raw.canDelete === true }
+    : { ...ROLE_DEFAULTS[role] }
   return {
     id: raw.id,
     name: raw.username ?? raw.name ?? '',
     email: raw.email ?? '',
     role,
-    permissions: { ...ROLE_DEFAULTS[role] },
+    permissions,
   }
 }
 
@@ -62,11 +79,26 @@ async function apiFetch(): Promise<AdminUser[]> {
     .filter((u: AdminUser) => u.name !== currentUsername)
 }
 
-async function apiSaveRole(id: number, role: Role): Promise<void> {
-  const res = await fetch(`${API}/api/admin/users/${id}`, {
-    method: 'PATCH',
+async function apiSaveUser(user: AdminUser): Promise<void> {
+  // Backend: PUT /api/admin/users/{id} — persists the role and the individual
+  // product permissions. Role is sent as the DB authority string, e.g. "ROLE_EDITOR".
+  const res = await fetch(`${API}/api/admin/users/${user.id}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({
+      role: `ROLE_${user.role.toUpperCase()}`,
+      canAdd: user.permissions.canAdd,
+      canEdit: user.permissions.canEdit,
+      canDelete: user.permissions.canDelete,
+    }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+}
+
+async function apiDeleteUser(id: number): Promise<void> {
+  const res = await fetch(`${API}/api/admin/users/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 }
@@ -89,14 +121,25 @@ function* handleSaveRole(action: ReturnType<typeof saveRoleRequest>) {
   const id = action.payload
   try {
     const user: AdminUser | undefined = yield select(selectUser(id))
-    if (user) yield call(apiSaveRole, id, user.role)
+    if (user) yield call(apiSaveUser, user)
     yield put(saveRoleSuccess(id))
   } catch (err) {
     yield put(saveRoleFailure({ id, message: err instanceof Error ? err.message : 'Failed to save' }))
   }
 }
 
-// Keep permission toggle in local state only (no backend column yet)
+function* handleDeleteUser(action: ReturnType<typeof deleteUserRequest>) {
+  const id = action.payload
+  try {
+    yield call(apiDeleteUser, id)
+    yield put(deleteUserSuccess(id))
+  } catch (err) {
+    yield put(deleteUserFailure({ id, message: err instanceof Error ? err.message : 'Failed to delete' }))
+  }
+}
+
+// Permissions are saved together with the role via the Save button (no separate
+// backend call when toggling).
 function* handleTogglePermission(_action: ReturnType<typeof togglePermissionRequest>) {
   // no-op saga: reducer already updated local state
 }
@@ -109,6 +152,7 @@ function* handleChangeRole(_action: ReturnType<typeof changeRoleRequest>) {
 export function* watchAdmin() {
   yield takeLatest(fetchRequest.type, handleFetch)
   yield takeEvery(saveRoleRequest.type, handleSaveRole)
+  yield takeEvery(deleteUserRequest.type, handleDeleteUser)
   yield takeEvery(changeRoleRequest.type, handleChangeRole)
   yield takeEvery(togglePermissionRequest.type, handleTogglePermission)
 }

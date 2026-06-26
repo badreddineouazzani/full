@@ -23,11 +23,10 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 18px 20px;
-  background: var(--bg);
+  padding: 16px 18px;
+  background: var(--bg-sidebar);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
 }
 
 .stat-value {
@@ -56,9 +55,9 @@
   flex: 1;
   font: inherit;
   font-size: 14px;
-  height: 40px;
+  height: 38px;
   padding: 0 14px;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
@@ -68,26 +67,26 @@
 .admin-search:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  box-shadow: 0 0 0 2px var(--accent-bg);
 }
 
 .admin-invite-btn {
   font: inherit;
   font-size: 14px;
-  font-weight: 600;
-  height: 40px;
+  font-weight: 500;
+  height: 38px;
   padding: 0 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   color: #fff;
   background: var(--accent);
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: filter 0.15s;
 }
 
 .admin-invite-btn:hover {
-  opacity: 0.9;
+  filter: brightness(0.94);
 }
 
 .admin-save-btn {
@@ -113,6 +112,35 @@
   cursor: not-allowed;
 }
 
+.admin-row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-delete-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid #e5484d;
+  border-radius: 6px;
+  background: transparent;
+  color: #e5484d;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.admin-delete-btn:hover:not(:disabled) {
+  background: #e5484d;
+  color: #fff;
+}
+
+.admin-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .perm-none {
   color: var(--text-muted, #aaa);
   font-size: 14px;
@@ -122,8 +150,7 @@
 .admin-table-wrap {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
   overflow-x: auto;
 }
 
@@ -156,7 +183,7 @@
 }
 
 .admin-table tbody tr:hover {
-  background: var(--accent-bg);
+  background: var(--hover);
 }
 
 /* User cell */
@@ -194,9 +221,9 @@
   font: inherit;
   font-size: 13px;
   font-weight: 600;
-  height: 34px;
+  height: 32px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
@@ -206,11 +233,12 @@
 .role-select:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
 }
 
-.role-select.role-superadmin { color: #aa3bff; border-color: var(--accent-border); }
-.role-select.role-admin      { color: #2563eb; }
-.role-select.role-editor     { color: #0d9488; }
+.role-select.role-superadmin { color: #9065b0; } /* Notion purple */
+.role-select.role-admin      { color: #2383e2; } /* Notion blue  */
+.role-select.role-editor     { color: #448361; } /* Notion green */
 .role-select.role-viewer     { color: var(--text); }
 
 /* Permission toggles */
