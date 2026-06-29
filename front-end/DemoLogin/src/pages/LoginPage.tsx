@@ -1,68 +1,56 @@
-import { useEffect, useState } from 'react'
 import { FormattedMessage } from 'react-intl'
-import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { loginRequest, clearError } from '../features/auth/authSlice'
+import { useAppDispatch } from '../store/hooks'
+import { loginRequest } from '../features/auth/authSlice'
+import { useAuthForm } from '../hooks/useAuthForm'
 import { useNav } from '../hooks/useNav'
+import AuthCard from '../components/AuthCard'
+import AuthField from '../components/AuthField'
+import AuthSwitch from '../components/AuthSwitch'
 
+/** Sign-in page: username + password, delegated to the auth saga via Redux. */
 function LoginPage() {
   const dispatch = useAppDispatch()
   const nav = useNav()
-  const { loading, error } = useAppSelector((s) => s.auth)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-
-  useEffect(() => () => { dispatch(clearError()) }, [dispatch])
+  const { values, setField, loading, error } = useAuthForm({ username: '', password: '' })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    dispatch(loginRequest({ username, password }))
+    dispatch(loginRequest(values))
   }
 
   return (
-    <div className="login-wrapper">
-      <form className="login-box" onSubmit={handleSubmit}>
-        <div className="login-header">
-          <span className="login-icon">🔐</span>
-          <h1>Sign in</h1>
-          <p className="login-subtitle">Welcome back, please enter your details</p>
-        </div>
+    <AuthCard
+      icon="🔐"
+      titleId="auth.login.title"
+      subtitleId="auth.login.subtitle"
+      onSubmit={handleSubmit}
+    >
+      <AuthField
+        labelId="auth.login.username"
+        placeholderId="auth.login.usernamePlaceholder"
+        value={values.username}
+        onChange={setField('username')}
+        autoComplete="username"
+      />
+      <AuthField
+        labelId="auth.login.password"
+        placeholderId="auth.login.passwordPlaceholder"
+        type="password"
+        value={values.password}
+        onChange={setField('password')}
+        autoComplete="current-password"
+      />
 
-        <label className="login-field">
-          <span>Username</span>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-          />
-        </label>
+      {error && <p className="login-error">{error}</p>}
 
-        <label className="login-field">
-          <span>Password</span>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-        </label>
+      <button type="submit" className="login-button" disabled={loading}>
+        {loading
+          ? <FormattedMessage id="auth.login.submitting" />
+          : <FormattedMessage id="auth.login.submit" />}
+      </button>
 
-        {error && <p className="login-error">{error}</p>}
-
-        <button type="submit" className="login-button" disabled={loading}>
-          {loading ? 'Signing in...' : 'Sign in'}
-        </button>
-
-        <p className="auth-switch">
-          <FormattedMessage id="auth.login.noAccount" />{' '}
-          <button type="button" className="auth-switch-link" onClick={nav.register}>
-            <FormattedMessage id="auth.login.signUp" />
-          </button>
-        </p>
-      </form>
-    </div>
+      <AuthSwitch promptId="auth.login.noAccount" linkId="auth.login.signUp" onClick={nav.register} />
+    </AuthCard>
   )
 }
 
