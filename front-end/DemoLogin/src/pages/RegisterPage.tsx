@@ -2,16 +2,13 @@ import { useEffect, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { registerRequest, clearError } from '../features/auth/authSlice'
+import { useNav } from '../hooks/useNav'
 
-interface RegisterPageProps {
-  onRegisterSuccess: () => void
-  onSwitchToLogin: () => void
-}
-
-function RegisterPage({ onRegisterSuccess, onSwitchToLogin }: RegisterPageProps) {
+function RegisterPage() {
   const dispatch = useAppDispatch()
   const intl = useIntl()
-  const { loading, error, token } = useAppSelector((s) => s.auth)
+  const nav = useNav()
+  const { loading, error } = useAppSelector((s) => s.auth)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -19,10 +16,6 @@ function RegisterPage({ onRegisterSuccess, onSwitchToLogin }: RegisterPageProps)
 
   const passwordsMatch = password === confirmPassword
   const canSubmit = username.length > 0 && password.length > 0 && passwordsMatch
-
-  useEffect(() => {
-    if (token) onRegisterSuccess()
-  }, [token, onRegisterSuccess])
 
   useEffect(() => () => { dispatch(clearError()) }, [dispatch])
 
@@ -88,7 +81,7 @@ function RegisterPage({ onRegisterSuccess, onSwitchToLogin }: RegisterPageProps)
 
         <p className="auth-switch">
           <FormattedMessage id="auth.register.haveAccount" />{' '}
-          <button type="button" className="auth-switch-link" onClick={onSwitchToLogin}>
+          <button type="button" className="auth-switch-link" onClick={nav.login}>
             <FormattedMessage id="auth.register.signIn" />
           </button>
         </p>

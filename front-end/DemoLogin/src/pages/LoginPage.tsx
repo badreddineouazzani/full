@@ -2,21 +2,14 @@ import { useEffect, useState } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loginRequest, clearError } from '../features/auth/authSlice'
+import { useNav } from '../hooks/useNav'
 
-interface LoginPageProps {
-  onLoginSuccess: () => void
-  onSwitchToRegister: () => void
-}
-
-function LoginPage({ onLoginSuccess, onSwitchToRegister }: LoginPageProps) {
+function LoginPage() {
   const dispatch = useAppDispatch()
-  const { loading, error, token } = useAppSelector((s) => s.auth)
+  const nav = useNav()
+  const { loading, error } = useAppSelector((s) => s.auth)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
-  useEffect(() => {
-    if (token) onLoginSuccess()
-  }, [token, onLoginSuccess])
 
   useEffect(() => () => { dispatch(clearError()) }, [dispatch])
 
@@ -64,7 +57,7 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }: LoginPageProps) {
 
         <p className="auth-switch">
           <FormattedMessage id="auth.login.noAccount" />{' '}
-          <button type="button" className="auth-switch-link" onClick={onSwitchToRegister}>
+          <button type="button" className="auth-switch-link" onClick={nav.register}>
             <FormattedMessage id="auth.login.signUp" />
           </button>
         </p>

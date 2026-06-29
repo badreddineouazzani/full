@@ -1,212 +1,23 @@
-import { useEffect, useMemo, useState } from 'react'
-import { FormattedMessage, useIntl } from 'react-intl'
-import { useAppDispatch, useAppSelector } from '../store/hooks'
-import Pagination from '../components/Pagination'
-import {
-  fetchRequest, setSearch, changeRoleRequest, saveRoleRequest, togglePermissionRequest,
-  deleteUserRequest,
-} from '../features/admin/adminSlice'
-import { logout } from '../features/auth/authSlice'
-import { ROLES, type Permission, type Role } from '../services/auth/roles'
-import { useLocale, type Locale } from '../services/i18n'
-import { useCurrentUser } from '../services/auth/useCurrentUser'
+import { useEffect } from 'react'
+import { useAppDispatch } from '../store/hooks'
+import { fetchRequest } from '../features/admin/adminSlice'
+import AdminHeader from '../components/AdminHeader'
+import AdminStats from '../components/AdminStats'
+import AdminUserTable from '../components/AdminUserTable'
 import '../admin/Dashboard.css'
 
-const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
-  { value: 'fr', label: 'Français' },
-  { value: 'en', label: 'English' },
-  { value: 'ar', label: 'العربية' },
-]
-
-const ALL_PERMISSIONS: { key: Permission; labelId: string }[] = [
-  { key: 'canAdd',    labelId: 'admin.perm.add'    },
-  { key: 'canEdit',   labelId: 'admin.perm.edit'   },
-  { key: 'canDelete', labelId: 'admin.perm.delete' },
-]
-
-interface SuperAdminPageProps {
-  onBack: () => void
-  onLoggedOut: () => void
-}
-
-function SuperAdminPage({ onBack, onLoggedOut }: SuperAdminPageProps) {
+function SuperAdminPage() {
   const dispatch = useAppDispatch()
-  const intl = useIntl()
-  const { locale, setLocale } = useLocale()
-  const { users, search, loading, error, saving } = useAppSelector((s) => s.admin)
-  const { hasRole } = useCurrentUser()
-  const availableRoles = hasRole('superadmin') ? ROLES : ROLES.filter((r) => r !== 'superadmin')
 
   useEffect(() => {
     dispatch(fetchRequest())
   }, [dispatch])
 
-  const stats = useMemo(() => {
-    const byRole: Record<Role, number> = { superadmin: 0, admin: 0, editor: 0, viewer: 0 }
-    for (const u of users) byRole[u.role]++
-    return { total: users.length, byRole }
-  }, [users])
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return users
-    return users.filter((u) => u.name.toLowerCase().includes(q))
-  }, [users, search])
-
-  const USERS_PER_PAGE = 8
-  const [page, setPage] = useState(1)
-  const pageCount = Math.max(1, Math.ceil(filtered.length / USERS_PER_PAGE))
-  const currentPage = Math.min(page, pageCount)
-  const pageUsers = filtered.slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE)
-
-  const handleLogout = () => { dispatch(logout()); onLoggedOut() }
-
   return (
     <section id="center">
-      <div className="page-header">
-        <div className="admin-title">
-          <h1>🛡️ <FormattedMessage id="admin.title" /></h1>
-          <p className="admin-subtitle"><FormattedMessage id="admin.subtitle" /></p>
-        </div>
-        <div className="header-controls">
-          <select
-            className="locale-select"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as Locale)}
-            aria-label="Language"
-          >
-            {LOCALE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <button className="logout-button" onClick={onBack}>
-            <span className="logout-icon">←</span>
-            <FormattedMessage id="admin.back" />
-          </button>
-          <button className="logout-button" onClick={handleLogout}>
-            <span className="logout-icon">↩</span>
-            <FormattedMessage id="common.logout" />
-          </button>
-        </div>
-      </div>
-
-      <div className="stat-grid">
-        <div className="stat-card">
-          <span className="stat-value">{stats.total}</span>
-          <span className="stat-label"><FormattedMessage id="admin.stat.totalUsers" /></span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{stats.byRole.admin + stats.byRole.superadmin}</span>
-          <span className="stat-label"><FormattedMessage id="admin.stat.admins" /></span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{stats.byRole.editor}</span>
-          <span className="stat-label"><FormattedMessage id="admin.stat.editors" /></span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{stats.byRole.viewer}</span>
-          <span className="stat-label"><FormattedMessage id="admin.stat.viewers" /></span>
-        </div>
-      </div>
-
-      <div className="admin-toolbar">
-        <input
-          className="admin-search"
-          type="text"
-          placeholder={intl.formatMessage({ id: 'admin.searchPlaceholder' })}
-          value={search}
-          onChange={(e) => { dispatch(setSearch(e.target.value)); setPage(1) }}
-        />
-      </div>
-
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th><FormattedMessage id="admin.col.user" /></th>
-              <th><FormattedMessage id="admin.col.role" /></th>
-              <th><FormattedMessage id="admin.col.permissions" /></th>
-              <th><FormattedMessage id="admin.col.actions" defaultMessage="Actions" /></th>
-            </tr>
-          </thead>
-          <tbody>
-            {pageUsers.map((u) => (
-              <tr key={u.id}>
-                <td>
-                  <div className="admin-user-cell">
-                    <span className="admin-avatar">{u.name.charAt(0)}</span>
-                    <div className="admin-user-name">{u.name}</div>
-                  </div>
-                </td>
-                <td>
-                  <select
-                    className={`role-select role-${u.role}`}
-                    value={u.role}
-                    onChange={(e) => dispatch(changeRoleRequest({ id: u.id, role: e.target.value as Role }))}
-                  >
-                    {availableRoles.map((r) => (
-                      <option key={r} value={r}>{intl.formatMessage({ id: `admin.role.${r}` })}</option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <div className="perm-toggles">
-                    {ALL_PERMISSIONS.map((p) => (
-                      <label key={p.key} className="perm-toggle">
-                        <input
-                          type="checkbox"
-                          checked={u.permissions[p.key]}
-                          onChange={() => dispatch(togglePermissionRequest({ id: u.id, perm: p.key }))}
-                        />
-                        <span className="perm-track"><span className="perm-thumb" /></span>
-                        <span className="perm-name"><FormattedMessage id={p.labelId} /></span>
-                      </label>
-                    ))}
-                  </div>
-                </td>
-                <td>
-                  <div className="admin-row-actions">
-                    <button
-                      className="admin-save-btn"
-                      disabled={saving[u.id] === true}
-                      onClick={() => dispatch(saveRoleRequest(u.id))}
-                    >
-                      {saving[u.id] === true
-                        ? intl.formatMessage({ id: 'admin.saving', defaultMessage: 'Saving…' })
-                        : intl.formatMessage({ id: 'admin.save', defaultMessage: 'Save' })}
-                    </button>
-                    <button
-                      className="admin-delete-btn"
-                      disabled={saving[u.id] === true}
-                      onClick={() => {
-                        const msg = intl.formatMessage(
-                          { id: 'admin.confirmDelete', defaultMessage: 'Delete user "{name}"? This cannot be undone.' },
-                          { name: u.name }
-                        )
-                        if (window.confirm(msg)) dispatch(deleteUserRequest(u.id))
-                      }}
-                    >
-                      {intl.formatMessage({ id: 'admin.delete', defaultMessage: 'Delete' })}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {loading && (
-          <p className="empty-state"><FormattedMessage id="admin.loading" defaultMessage="Loading users…" /></p>
-        )}
-        {!loading && error && (
-          <p className="empty-state">⚠️ {error}</p>
-        )}
-        {!loading && !error && filtered.length === 0 && (
-          <p className="empty-state"><FormattedMessage id="admin.noResults" /> 🤷</p>
-        )}
-        {!loading && !error && (
-          <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
-        )}
-      </div>
+      <AdminHeader />
+      <AdminStats />
+      <AdminUserTable />
     </section>
   )
 }
